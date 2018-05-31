@@ -23,5 +23,5 @@ while read l; do
     sbatch  -J ${INDEX} \
             -o log/bowtie-${INDEX}.out \
             -e log/bowtie-${INDEX}.err \
-            src/bowtie_samtools_picard.batch
+            src/bowtie_samtools_picard.slurm
 done
