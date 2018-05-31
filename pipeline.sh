@@ -22,6 +22,9 @@ SOURCEDIR=path_to_raw_fastq_files/
 # Directory to store large intermediate files (e.g. .fastq, .bam)
 DATADIR=path_to_intermediate_data_files/
 
+# Path to GATK .jar file, wherever it is installed.
+GATKPATH=/absolute/path/GenomeAnalysisTK.jar
+
 ### Batch jobs on computing cluster ###
 
 # Create a log directory for slurm log files
@@ -49,9 +52,18 @@ bash src/submit_bowtie_and_picard_jobs.sh \
     $DATADIR/bam \
     $REFPREFIX
 
-# Call candidate variants with GATK.
+# Make a list of the duplicate-marked bam files you want to include in GATK run.
+# NOTE: edit this file to ignore some bam files or include others.
+ls -d $DATADIR/bam/*.dm.bam > bam_list.txt
 
-# Parse and vcf files.
+# Call candidate variants using GATK.
+sbatch src/gatk_by_chrom_jobarray.slurm \
+sbatch src/run_GATK.slurm \
+    $GATKPATH \
+    $REFPREFIX \
+    bam_list.txt \
+    $DATADIR/vcf/snps_and_indels
+
 
 ### Locally or interactively ###
 
