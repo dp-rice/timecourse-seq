@@ -7,5 +7,4 @@
 #SBATCH -o log/parse_vcf_%A.out
 #SBATCH -e log/parse_vcf_%A.err
 
-python scripts/parse_sort_and_combine_vcfs.py \
-    $1 $2 $3 > $4
+python scripts/parse_sort_and_combine_vcfs.py $1 $2 > $3

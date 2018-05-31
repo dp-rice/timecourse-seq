@@ -63,16 +63,10 @@ sbatch src/run_GATK.slurm \
     bam_list.txt \
     $DATADIR/vcf/snps_and_indels
 
-bash scripts/get_readgroups_from_bam_files.sh \
-    < scripts/bam_list_haploid_2015-11-16.list \
-    > scripts/readgroups_haploid_2015-11-16.txt
-
 # Parse vcf and merge files.
-# Add columns of zeros for the unsequenced time points
 sbatch scripts/parse_vcfs.slurm \
     $DATADIR/vcf/snps_and_indels \
-    scripts/missing_timepoints_2015-09-26.txt \
-    scripts/readgroups_haploid_2015-11-16.txt \
+    $PLANFILE \
     $DATADIR/vcf/snps_and_indels_parsed.txt
 
 ### May be done locally or interactively ###
