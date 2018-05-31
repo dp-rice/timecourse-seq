@@ -79,9 +79,16 @@ sbatch src/parse_vcfs.slurm \
 
 # Filter candidate mutations. This is done in two steps:
 
-# Identify mutations that are physically close to one another.
+python filter_mutations.py \
+    $DATADIR/vcf/snps_and_indels_parsed.txt \
+    src/set_up_populations_haploid.py \
+    > snps_and_indels_filtered1.txt
 
-# Manually curate false-positives.
+python filter_by_binomial_pvalues.py \
+    snps_and_indels_filtered1.txt \
+    1e-5 low \
+    src/set_up_populations_haploid.py \
+    > snps_and_indels_filtered2.txt
 
 # Annotate mutations.
 python src/annotate_mutations.py \
