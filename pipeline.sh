@@ -51,6 +51,10 @@ sbatch -J trim -o log/trim.out -e log/trim.err \
     $DATADIR/fastq/
 
 # Align reads to reference sequence with bowtie2.
+# NOTE: Change to load the modules on your cluster
+module load centos6/bowtie2-2.1.0
+module load centos6/samtools-0.1.19
+module load hpc/picard-tools-1.44
 bash src/submit_bowtie_and_picard_jobs.sh \
     $PLANFILE \
     $DATADIR/fastq/ \
