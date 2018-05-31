@@ -82,7 +82,7 @@ sbatch src/parse_vcfs.slurm \
 
 python filter_mutations.py \
     $DATADIR/vcf/snps_and_indels_parsed.txt \
-    src/set_up_populations_haploid.py \
+    $PLANFILE \
     > snps_and_indels_filtered1.txt
 
 python filter_by_binomial_pvalues.py \

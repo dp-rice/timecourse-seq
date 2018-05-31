@@ -1,7 +1,7 @@
 import numpy as np
 from sys import argv
 
-def autocorrelation(freqs):	
+def autocorrelation(freqs):
     masked_freqs = np.ma.masked_array(freqs, np.isnan(freqs))
     first =  masked_freqs[:-1]
     second = masked_freqs[1:]
@@ -10,10 +10,22 @@ def autocorrelation(freqs):
     else:
         return np.ma.corrcoef(first, second)[0,1]
 
-script, candidate_fn, setup_fn = argv
-execfile(setup_fn)
+script, candidate_fn, plan_fn = argv
 
+# The number of columns to take to identify the mutation
+# (default takes: chrom, position, ref, alt)
 len_mutid = 4
+
+# Set up a dictionary organizing the samples by population.
+with open(plan_fn) as planfile:
+    samples = ['-'.join(line.split()[-2:]) for line in planfile]
+pop_dict = {}
+for sample in samples:
+    pop = sample.split('-')[0]
+    try:
+        pop_dict[pop].append(sample)
+    except KeyError:
+        pop_dict[pop] = [sample]
 
 with open(candidate_fn) as infile:
     header = infile.readline()
@@ -21,13 +33,9 @@ with open(candidate_fn) as infile:
     print "Pop\t" + header.strip()
 
     sheader = header.split()
-    insample_indices = {pop:[sheader.index(tp) for tp in insample_dict[pop]] for pop in populations}
-    metapop_indices = {}
-    for pop in populations:
-        metapop_indices[pop] = []
-        for i, tp in enumerate(sheader):
-            if tp.split('-')[0] in metapop_dict[pop]:
-                metapop_indices[pop].append(i)
+    sample_indices = {pop:[sheader.index(pop_dict[pop])
+                                for sample in pop_dict[pop]]
+                        for pop in pop_dict}
 
     for line in infile:
         sline  = line.split()
@@ -42,25 +50,18 @@ with open(candidate_fn) as infile:
             continue
         #######################
 
-        for pop in populations:
-            insample = np.array([map(float, sline[i].split(',')) for i in insample_indices[pop]])
-            metapop  = np.array([map(float, sline[i].split(',')) for i in metapop_indices[pop]])
-#            alldata  = np.array([map(float, entry.split(',')) for entry in sline[len_mutid:]])
-
-            outsample = np.array([map(float, sline[i].split(',')) for i in range(len_mutid,len(sline)) if i not in metapop_indices[pop]])
-#            outsample_freq = map(float, [freq_line[j] for j in range(4,len(freq_line)) if j not in metapop_indices])
+        for pop in pop_dict:
+            insample = np.array([map(float, sline[i].split(','))
+                                for i in sample_indices[pop]])
+            outsample = np.array([map(float, sline[i].split(','))
+                                for i in range(len_mutid,len(sline)) if i not in sample_indices[pop]])
 
             ref_counts = insample[:,0]
             os_ref = outsample[:,0]
-            mp_ref  = metapop[:,0]
-#            all_ref = np.sum(alldata[:,0])
             for i in range(1, n_alts + 1):
                 alt_counts = insample[:,i]
                 #Filter on total read supporting the mutation
-#                if np.sum(alt_counts) < 10:
-#                    continue
-                mp_alt_counts = metapop[:,i]
-                if np.sum(mp_alt_counts) < 10:
+                if np.sum(alt_counts) < 10:
                     continue
 
                 coverage  = ref_counts + alt_counts
@@ -69,11 +70,8 @@ with open(candidate_fn) as infile:
                     continue
 
                 frequency = alt_counts / coverage
-                mp_coverage = mp_ref + mp_alt_counts
-                mp_freq = mp_alt_counts / mp_coverage
                 #Filter on maximum frequency
-#                if (frequency > 0.10).sum() < 2:
-                if (mp_freq > 0.10).sum() < 2:
+                if (frequency > 0.10).sum() < 1:
                     continue
 
                 #Filter on frequency outside of the focal pop
@@ -88,13 +86,8 @@ with open(candidate_fn) as infile:
                 ac = autocorrelation(frequency)
                 #Filter on autocorrelation
                 if ac < 0.2:
-#                if ac < 0.15:
                     continue
                 elif str(ac) == '--':
                     continue
 
                 print pop + '\t' + line.strip()
-#                statstring = "{0:.2f}\t{1:.2f}\t".format(ac, out_freq)
-#                print pop + '\t' + line.strip() + '\t' + statstring
-
-
