@@ -18,6 +18,7 @@ CHROMFILE=chromosomes.txt
 # The first four columns specify nextera tag information.
 # Column 5 gives the population name.
 # Column 6 gives the generation number.
+# Rows should be sorted by population and then by generation.
 PLANFILE=planfile.txt
 
 # Directory containing your zipped original fastq files
@@ -87,7 +88,7 @@ python filter_mutations.py \
 python filter_by_binomial_pvalues.py \
     snps_and_indels_filtered1.txt \
     1e-5 low \
-    src/set_up_populations_haploid.py \
+    $PLANFILE \
     > snps_and_indels_filtered2.txt
 
 # Annotate mutations.
