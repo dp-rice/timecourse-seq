@@ -10,6 +10,10 @@
 # REFPREFIX should be `/Users/username/reference/ref_sequence`
 REFPREFIX=path_to_reference_genome
 
+# File with the name of one chromosome on each line.
+# Names should match your reference sequence file.
+CHROMFILE=chromosomes.txt
+
 # Text file containing metadata for your sequenced timepoints
 # The first four columns specify nextera tag information.
 # Column 5 gives the population name.
@@ -57,14 +61,16 @@ bash src/submit_bowtie_and_picard_jobs.sh \
 ls -d $DATADIR/bam/*.dm.bam > bam_list.txt
 
 # Call candidate variants using GATK.
-sbatch src/run_GATK.slurm \
+sbatch --array=1-$(wc -l $CHROMFILE) src/run_GATK.slurm \
     $GATKPATH \
     $REFPREFIX \
+    $CHROMFILE \
     bam_list.txt \
     $DATADIR/vcf/snps_and_indels
 
 # Parse vcf and merge files.
-sbatch scripts/parse_vcfs.slurm \
+sbatch src/parse_vcfs.slurm \
+    $CHROMFILE \
     $DATADIR/vcf/snps_and_indels \
     $PLANFILE \
     $DATADIR/vcf/snps_and_indels_parsed.txt
@@ -79,8 +85,9 @@ sbatch scripts/parse_vcfs.slurm \
 
 # Annotate mutations.
 python src/annotate_mutations.py \
-   src/genetic_code_table.txt \
-   $REFPREFIX.gff \
-   $REFPREFIX.fasta \
-   < snps_and_indels_filtered2.txt \
-   > snps_and_indels_filtered_annotated.txt
+    $CHROMFILE \
+    src/genetic_code_table.txt \
+    $REFPREFIX.gff \
+    $REFPREFIX.fasta \
+    < snps_and_indels_filtered2.txt \
+    > snps_and_indels_filtered_annotated.txt

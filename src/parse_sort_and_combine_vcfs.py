@@ -8,14 +8,16 @@ def get_read_count(string, idex):
         count = string.split(':')[idex]
     return count
 
-prefix = argv[1]
-planfile_fn = argv[2]
+chrom_fn = argv[1]
+prefix = argv[2]
+planfile_fn = argv[3]
+
+with open(chrom_fn) as chromfile:
+    CHROMS = [line.strip() for line in chromfile]
 
 with open(planfile_fn) as planfile:
     sample_list = ['-'.join(line.split()[:-2]) for line in planfile]
 
-# NOTE: Make sure these are appropriate for your organism.
-CHROMS = ['chrI', 'chrII', 'chrIII', 'chrIV', 'chrV', 'chrVI', 'chrVII', 'chrVIII', 'chrIX', 'chrX', 'chrXI', 'chrXII', 'chrXIII', 'chrXIV', 'chrXV', 'chrXVI', 'chrMito']
 COLS_TO_GET = ['#CHROM', 'POS', 'REF', 'ALT']
 
 header = ['CHROM', 'POS', 'REF', 'ALT'] + sample_list

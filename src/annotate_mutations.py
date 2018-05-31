@@ -4,7 +4,10 @@ complem = string.maketrans('GATC','CTAG')
 
 #This code takes a .gff file, a .fasta file, and a tab-separated text file with mutations, and outputs a tab-separated text file where the mutations have been annotated.
 
-script, genetic_code_fn, gene_list_file, fasta_file = sys.argv
+script, chrom_fn, genetic_code_fn, gene_list_file, fasta_file = sys.argv
+
+with open(chrom_fn) as chromfile:
+    chrom_labels = [line.strip() for line in chromfile]
 
 # Read in genetic code dictionary
 genetic_code = {}
@@ -14,8 +17,6 @@ with open(genetic_code_fn) as genetic_code_file:
 	    codons = linelist[3].split(', ')
 	    for i in range(len(codons)):
 		    genetic_code[codons[i]] = linelist[0].strip()
-
-chrom_labels = ['chr' + i for i in ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV','XVI']]
 
 gene_dict = {chrom:[] for chrom in chrom_labels}
 with open(gene_list_file) as file_genes:

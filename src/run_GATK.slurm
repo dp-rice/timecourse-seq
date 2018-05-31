@@ -9,14 +9,11 @@
 
 GATKPATH=$1
 REFPREFIX=$2
-BAMLISTFILE=$3
-OUTPUTPREFIX=$4
+CHROMFILE=$3
+BAMLISTFILE=$4
+OUTPUTPREFIX=$5
 
-# NOTE: Make sure this matches the chromosomes in your reference sequence
-CHROMS=(chrI chrII chrIII chrIV chrV chrVI chrVII chrVIII \
-        chrIX chrX chrXI chrXII chrXIII chrXIV chrXV chrXVI \
-        chrMito 2-micron)
-CHROM=${CHROMS[${SLURM_ARRAY_TASK_ID}]}
+CHROM=$(sed ${SLURM_ARRAY_TASK_ID}'q;d' ${CHROMFILE})
 OUTPUTFILE=${OUTPUTPREFIX}-${CHROM}.vcf
 
 # Run GATK UnifiedGenotyper on the lowest confidence setting to get a permissive list of candidate mutations.
