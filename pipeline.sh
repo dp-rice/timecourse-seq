@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# WARNING: Do not execute this file all at once.
+# Several commands submit batch jobs and need to be run sequentially.
+
 ### bash variables ###
 
 # Text file containing metadata for your sequenced timepoints
@@ -27,6 +30,10 @@ sbatch -J unzip -o slurm/unzip.out -e slurm/unzip.err \
     $DATADIR/fastq/
 
 # Trim adaptor sequences from fastq files.
+sbatch -J trim -o slurm/trim.out -e slurm/trim.err \
+    src/trim_fastq.slurm \
+    $PLANFILE \
+    $DATADIR/fastq/
 
 # Align reads to reference sequence with bowtie2.
 
