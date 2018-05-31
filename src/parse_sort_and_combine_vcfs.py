@@ -16,7 +16,7 @@ with open(chrom_fn) as chromfile:
     CHROMS = [line.strip() for line in chromfile]
 
 with open(planfile_fn) as planfile:
-    sample_list = ['-'.join(line.split()[:-2]) for line in planfile]
+    sample_list = ['-'.join(line.split()[-2:]) for line in planfile]
 
 COLS_TO_GET = ['#CHROM', 'POS', 'REF', 'ALT']
 
