@@ -19,18 +19,20 @@ DATADIR=path_to_intermediate_data_files/
 
 ### Batch jobs on computing cluster ###
 
+# Create a log directory for slurm log files
+mkdir -p log/
+
 # Unzip and rename fastq files according to population and generation.
 # Creates new files, does not modify source files.
 # WARNING: Make sure that your fastq filenames match the format in unzip_and_rename.slurm
-# WARNING: Make sure that you have a slurm/ directory in your working directory or specify a different location for slurm output and error files.
-sbatch -J unzip -o slurm/unzip.out -e slurm/unzip.err \
+sbatch -J unzip -o log/unzip.out -e log/unzip.err \
     src/unzip_and_rename.slurm \
     $PLANFILE \
     $SOURCEDIR/ \
     $DATADIR/fastq/
 
 # Trim adaptor sequences from fastq files.
-sbatch -J trim -o slurm/trim.out -e slurm/trim.err \
+sbatch -J trim -o log/trim.out -e log/trim.err \
     src/trim_fastq.slurm \
     $PLANFILE \
     $DATADIR/fastq/
