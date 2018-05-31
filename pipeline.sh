@@ -57,19 +57,27 @@ bash src/submit_bowtie_and_picard_jobs.sh \
 ls -d $DATADIR/bam/*.dm.bam > bam_list.txt
 
 # Call candidate variants using GATK.
-sbatch src/gatk_by_chrom_jobarray.slurm \
 sbatch src/run_GATK.slurm \
     $GATKPATH \
     $REFPREFIX \
     bam_list.txt \
     $DATADIR/vcf/snps_and_indels
 
+bash scripts/get_readgroups_from_bam_files.sh \
+    < scripts/bam_list_haploid_2015-11-16.list \
+    > scripts/readgroups_haploid_2015-11-16.txt
 
-### Locally or interactively ###
+# Parse vcf and merge files.
+# Add columns of zeros for the unsequenced time points
+sbatch scripts/parse_vcfs.slurm \
+    $DATADIR/vcf/snps_and_indels \
+    scripts/missing_timepoints_2015-09-26.txt \
+    scripts/readgroups_haploid_2015-11-16.txt \
+    $DATADIR/vcf/snps_and_indels_parsed.txt
 
-# Filter candidate mutations.
+### May be done locally or interactively ###
 
-# Identify founder mutations.
+# Filter candidate mutations. This is done in two steps:
 
 # Identify mutations that are physically close to one another.
 
