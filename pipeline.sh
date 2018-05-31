@@ -5,6 +5,11 @@
 
 ### bash variables ###
 
+# Prefix for reference genome files.
+# For example, if your reference genome is in the file `/Users/username/reference/ref_sequence.fasta`,
+# REFPREFIX should be `/Users/username/reference/ref_sequence`
+REFPREFIX=path_to_reference_genome
+
 # Text file containing metadata for your sequenced timepoints
 # The first four columns specify nextera tag information.
 # Column 5 gives the population name.
@@ -38,6 +43,11 @@ sbatch -J trim -o log/trim.out -e log/trim.err \
     $DATADIR/fastq/
 
 # Align reads to reference sequence with bowtie2.
+bash src/submit_bowtie_and_picard_jobs.sh \
+    $PLANFILE \
+    $DATADIR/fastq/ \
+    $DATADIR/bam \
+    $REFPREFIX
 
 # Call candidate variants with GATK.
 
