@@ -9,6 +9,8 @@
 # For example, if your reference genome is in the file `/Users/username/reference/ref_sequence.fasta`,
 # REFPREFIX should be `/Users/username/reference/ref_sequence`
 REFPREFIX=path_to_reference_genome
+# NOTE: bowtie2 and GATK may require you to make some index files for your reference,
+# but I don't remember which ones. Please see the docs for those programs.
 
 # File with the name of one chromosome on each line.
 # Names should match your reference sequence file.
@@ -30,10 +32,13 @@ DATADIR=path_to_intermediate_data_files/
 # Path to GATK .jar file, wherever it is installed.
 GATKPATH=/absolute/path/GenomeAnalysisTK.jar
 
-### Batch jobs on computing cluster ###
-
-# Create a log directory for slurm log files
+# Create a log directory for slurm log files and directories for output files
 mkdir -p log/
+mkdir -p $DATADIR/fastq/
+mkdir -p $DATADIR/bam/
+mkdir -p $DATADIR/vcf/
+
+### Batch jobs on computing cluster ###
 
 # Unzip and rename fastq files according to population and generation.
 # Creates new files, does not modify source files.
@@ -58,7 +63,7 @@ module load hpc/picard-tools-1.44
 bash src/submit_bowtie_and_picard_jobs.sh \
     $PLANFILE \
     $DATADIR/fastq/ \
-    $DATADIR/bam \
+    $DATADIR/bam/ \
     $REFPREFIX
 
 # Make a list of the duplicate-marked bam files you want to include in GATK run.
@@ -66,7 +71,8 @@ bash src/submit_bowtie_and_picard_jobs.sh \
 ls -d $DATADIR/bam/*.dm.bam > bam_list.txt
 
 # Call candidate variants using GATK.
-sbatch --array=1-$(wc -l $CHROMFILE) src/run_GATK.slurm \
+sbatch --array=1-$(wc -l $CHROMFILE) \
+    src/run_GATK.slurm \
     $GATKPATH \
     $REFPREFIX \
     $CHROMFILE \
@@ -84,11 +90,24 @@ sbatch src/parse_vcfs.slurm \
 
 # Filter candidate mutations. This is done in two steps:
 
+# This script does most of the filtering. It filters on:
+# - number of alternate alleles (=1)
+# - total read count supporting the mutation (>=10)
+# - maximum frequency within the focal population (>0.1)
+# - average frequency outside of the focal population (<0.05)
+# - frequency lag-1 autoccorelation (>0.2)
+# NOTE: filter values are "magic numbers" in the code. You can modify them there.
 python filter_mutations.py \
     $DATADIR/vcf/snps_and_indels_parsed.txt \
     $PLANFILE \
     > snps_and_indels_filtered1.txt
 
+# This script does one additonal filtering step:
+# calculates the likelihood of the data under the model:
+# k ~ Binom(n,p),
+# where k is the total allele count within the focal popualtion,
+# n is the total coverage in the focal population,
+# and p is the allele frequency outside of the focal population.
 python filter_by_binomial_pvalues.py \
     snps_and_indels_filtered1.txt \
     1e-5 low \
