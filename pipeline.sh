@@ -78,5 +78,9 @@ sbatch scripts/parse_vcfs.slurm \
 # Manually curate false-positives.
 
 # Annotate mutations.
-
-# Mark nearby "compound" mutations.
+python src/annotate_mutations.py \
+   src/genetic_code_table.txt \
+   $REFPREFIX.gff \
+   $REFPREFIX.fasta \
+   < snps_and_indels_filtered2.txt \
+   > snps_and_indels_filtered_annotated.txt
