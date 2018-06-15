@@ -33,7 +33,7 @@ with open(candidate_fn) as infile:
     print "Pop\t" + header.strip()
 
     sheader = header.split()
-    sample_indices = {pop:[sheader.index(pop_dict[pop])
+    sample_indices = {pop:[sheader.index(sample)
                                 for sample in pop_dict[pop]]
                         for pop in pop_dict}
 
@@ -43,7 +43,7 @@ with open(candidate_fn) as infile:
         altlist = mut_id[3].split(',')
         n_alts = len(altlist)
 
-        sline = ["0" + ",0"*n_alts if entry == "0" else entry for entry in sline]
+        sline = ["0" + ",0"*n_alts if entry in ["0",'.'] else entry for entry in sline]
 
         ##### DELETE THIS TO ALLOW FOR MULTIPLE ALTs #####
         if n_alts > 1:
