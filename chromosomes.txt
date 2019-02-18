@@ -12,5 +12,5 @@ chrXI
 chrXII
 chrXIII
 chrXIV
-chrV
-chrVI
+chrXV
+chrXVI
