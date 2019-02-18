@@ -20,8 +20,7 @@ with open(data_fn) as infile:
     header = infile.readline()
     print header.strip()
     sheader = header.split()
-    sample_indices = {pop:[sheader.index(pop_dict[pop])
-                                for sample in pop_dict[pop]]
+    sample_indices = {pop:[sheader.index(sample) for sample in pop_dict[pop]]
                         for pop in pop_dict}
 
     for line in infile:
